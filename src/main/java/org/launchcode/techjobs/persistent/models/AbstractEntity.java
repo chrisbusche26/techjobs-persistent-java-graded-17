@@ -21,9 +21,7 @@ public abstract class AbstractEntity {
     @Size(min = 1, max = 255)
     private String name;
 
-    public int getId() {
-        return id;
-    }
+    public int getId() { return id; }
 
     public String getName() {
         return name;
