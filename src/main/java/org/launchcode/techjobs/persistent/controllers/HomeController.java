@@ -1,7 +1,12 @@
 package org.launchcode.techjobs.persistent.controllers;
 
 import jakarta.validation.Valid;
+import org.launchcode.techjobs.persistent.models.Employer;
 import org.launchcode.techjobs.persistent.models.Job;
+import org.launchcode.techjobs.persistent.models.Skill;
+import org.launchcode.techjobs.persistent.models.data.EmployerRepository;
+import org.launchcode.techjobs.persistent.models.data.JobRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -17,6 +22,12 @@ import java.util.Optional;
 @Controller
 public class HomeController {
 
+    @Autowired
+    private EmployerRepository employerRepository;
+
+    @Autowired
+    private JobRepository jobRepository;
+
     @RequestMapping("/")
     public String index(Model model) {
 
@@ -29,6 +40,8 @@ public class HomeController {
     public String displayAddJobForm(Model model) {
 	model.addAttribute("title", "Add Job");
         model.addAttribute(new Job());
+        model.addAttribute("employers", employerRepository.findAll());
+
         return "add";
     }
 
@@ -38,7 +51,14 @@ public class HomeController {
 
         if (errors.hasErrors()) {
 	    model.addAttribute("title", "Add Job");
+        model.addAttribute(new Job());
             return "add";
+        }
+
+        Optional<Employer> optEmployer = employerRepository.findById(employerId);
+        if (optEmployer.isPresent()) {
+            newJob.setEmployer(optEmployer.get());
+            jobRepository.save(newJob);
         }
 
         return "redirect:";
@@ -47,7 +67,14 @@ public class HomeController {
     @GetMapping("view/{jobId}")
     public String displayViewJob(Model model, @PathVariable int jobId) {
 
+        Optional<Job> optJob = jobRepository.findById(jobId);
+        if (optJob.isPresent()) {
+            Job job = (Job) optJob.get();
+            model.addAttribute("job", job);
             return "view";
+        } else {
+            return "redirect:../";
+        }
     }
 
 }
